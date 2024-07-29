@@ -17,17 +17,17 @@ print(f'Public IP Address: {ip}')
 load_dotenv()
 
 TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
-APP_ID = int(os.environ.get("APP_ID", "28196802"))
-API_HASH = os.environ.get("API_HASH", "dccf92fd1c0bad1b7de1e8efc63654ff")
+APP_ID = int(os.environ.get("APP_ID", "15646796"))
+API_HASH = os.environ.get("API_HASH", "08bdb932cf2815a46b2a5f17cf245bfe")
 
 
-OWNER = os.environ.get("OWNER", "@VergilGfx")  # Owner username
-OWNER_ID = int(os.environ.get("OWNER_ID", "5745818770"))  # Owner user id
+OWNER = os.environ.get("OWNER", "@iTz_Anayokoji")  # Owner username
+OWNER_ID = int(os.environ.get("OWNER_ID", "6450266465"))  # Owner user id
 DB_URL = os.environ.get("DB_URL", "")
 DB_NAME = os.environ.get("DB_NAME", "")
 
 
-CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002215036092"))
+CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002181491329"))
 FORCE_SUB_CHANNEL1 = int(os.environ.get("FORCE_SUB_CHANNEL1", "0"))
 FORCE_SUB_CHANNEL2 = int(os.environ.get("FORCE_SUB_CHANNEL2", "0"))
 FORCE_SUB_CHANNEL3 = int(os.environ.get("FORCE_SUB_CHANNEL3", "0"))
@@ -37,7 +37,7 @@ SECONDS = int(os.getenv("SECONDS", "600"))  # auto delete in seconds
 
 
 PORT = os.environ.get("PORT", "8080")
-TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "5"))
+TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "1"))
 
 
 # start message
@@ -46,7 +46,7 @@ START_MSG = os.environ.get(
 
 try:
     ADMINS = [5745818770]
-    for x in (os.environ.get("ADMINS", "5745818770 5964367469 7138310520 6877704277 1207296799").split()):
+    for x in (os.environ.get("ADMINS", "6450266465").split()):
         ADMINS.append(int(x))
 except ValueError:
     raise Exception("Your Admins list does not contain valid integers.")
