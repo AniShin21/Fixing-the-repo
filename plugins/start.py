@@ -265,7 +265,7 @@ async def send_text(client: Bot, message: Message):
         await msg.delete()
     return
 
-@Bot.on_message(filters.command('add_admin') & filters.private & filters.user(OWNER_ID))
+@Bot.on_message(filters.command('add_admin') & filters.private & filters.user(ADMINS))
 async def command_add_admin(client: Bot, message: Message):
     while True:
         try:
@@ -306,7 +306,7 @@ async def command_add_admin(client: Bot, message: Message):
     return
 
 
-@Bot.on_message(filters.command('del_admin') & filters.private  & filters.user(OWNER_ID))
+@Bot.on_message(filters.command('del_admin') & filters.private  & filters.user(ADMINS))
 async def delete_admin_command(client: Bot, message: Message):
     while True:
         try:
@@ -333,7 +333,7 @@ async def delete_admin_command(client: Bot, message: Message):
         await message.reply("admin doesn't exist. 💀")
     return
 
-@Bot.on_message(filters.command('admins')  & filters.private & filters.private)
+@Bot.on_message(filters.command('admins')  & filters.private & filters.user(ADMINS))
 async def admin_list_command(client: Bot, message: Message):
     admin_list = await full_adminbase()
     await message.reply(f"Full admin list 📃\n<code>{admin_list}</code>")
