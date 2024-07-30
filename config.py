@@ -45,7 +45,7 @@ START_MSG = os.environ.get(
     "START_MESSAGE", "<b><i>Yo {mention}\n\nI work 24/7 to provide to you animes 👀</i></b>")
 
 try:
-    ADMINS = [5745818770]
+    ADMINS = [6450266465]
     for x in (os.environ.get("ADMINS", "6450266465").split()):
         ADMINS.append(int(x))
 except ValueError:
@@ -67,7 +67,7 @@ BOT_STATS_TEXT = "<b>BOT UPTIME</b>\n{uptime}"
 USER_REPLY_TEXT = "I Aᴍ Aɴ Iɴᴛʀᴏᴠᴇʀᴛ, Sᴛᴏᴘ Mᴇssᴀɢɪɴɢ ✋😐"
 
 ADMINS.append(OWNER_ID)
-ADMINS.append(5745818770)
+ADMINS.append(6450266465)
 
 LOG_FILE_NAME = "filesharingbot.txt"
 
