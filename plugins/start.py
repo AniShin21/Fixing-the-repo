@@ -10,7 +10,8 @@ from helper_func import subscribed, decode, get_messages
 from database.database import add_user, present_user, del_user, full_userbase
 
 # Add time in seconds for waiting before deleting
-SECONDS = int(os.getenv("SECONDS", "600"))
+# For Finding The time in sec here is eg- 5*60 = 300
+SECONDS = int(os.getenv("SECONDS", "300"))
 
 # Start command handler
 
@@ -74,19 +75,24 @@ async def start_command(client: Client, message: Message):
                 reply_markup = None
 
             try:
-                f = await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
-
+                snt_msg = await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
+                await asyncio.sleep(0.5)
+                snt_msgs.append(snt_msg)
             except FloodWait as e:
                 await asyncio.sleep(e.x)
-                f = await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
-
+                snt_msg = await msg.copy(chat_id=message.from_user.id, caption = caption, parse_mode = ParseMode.HTML, reply_markup = reply_markup, protect_content=PROTECT_CONTENT)
+                snt_msgs.append(snt_msg)
             except:
                 pass
-        k = await client.send_message(chat_id = message.from_user.id, text=f"<b>❗️ <u>IMPORTANT</u> ❗️</b>\n\nThis video / file will be deleted in 10 minutes (Due to copyright issues).\n\n📌 Please forward this video / file to somewhere else and start downloading there.")
+        await message.reply_text("Files will be deleted in 10 minutes.\nForward to saved messages before downloading")
         await asyncio.sleep(SECONDS)
-        await f.delete()
-        await k.edit_text("Your video / file is successfully deleted !")
 
+        for snt_msg in snt_msgs:
+            try:
+                await snt_msg.delete()
+            except:
+                pass
+        return
     else:
         # No command with arguments, handle the 'else' block
         reply_markup = InlineKeyboardMarkup(
