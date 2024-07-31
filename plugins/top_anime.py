@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
-from pyrofork import Client, filters
-from pyrofork.types import Message
+from pyrogram import Client, filters
+from pyrogram.types import Message
 from bot import Bot
 from helper_func import subscribed, decode, get_messages
 from database.database import present_user, add_user
