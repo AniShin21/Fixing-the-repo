@@ -13,28 +13,24 @@ from database.database import present_user, add_user
 # If You Get Any Error Then Contact me i will not help you 
 # I Will Help But Only If You Pay Me ( Just kidding bro i am not serious )
 # Contact Me @iTz_Anayokoji
-import requests
-from bs4 import BeautifulSoup
-from pyrogram import Client, filters
-from pyrogram.types import Message
-
-# Function to fetch top anime from MyAnimeList
-def fetch_top_anime():
-    url = 'https://myanimelist.net/topanime.php?type=bypopularity'
+# Function to scrape the top anime of the month
+def scrape_top_anime():
+    url = 'https://myanimelist.net/topanime.php'  # URL of the site to scrape
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     
-    # Extract anime titles from the page
-    titles = soup.select('.ranking-list .title .hoverinfo_trigger')
-    top_anime = [title.get_text().strip() for title in titles[:10]]  # Get top 10 anime titles
+    # Extract the top anime list
+    top_anime_list = []
+    for i, anime in enumerate(soup.select('.ranking-list .title .link-title'), start=1):
+        if i > 5:  # Limit to top 5
+            break
+        anime_title = anime.text.strip()
+        top_anime_list.append(f"{i}. {anime_title}")
     
-    return top_anime
+    return "\n".join(top_anime_list)
 
-@Client.on_message(filters.command('top_anime') & filters.private)
+# Command handler for /top_anime using the provided structure
+@app.on_message(filters.command('top_anime') & filters.private)
 async def top_anime_command(client: Client, message: Message):
-    try:
-        top_anime_list = fetch_top_anime()
-        response_message = "<b>Top Anime of July 2024:</b>\n\n" + "\n".join(f"{i+1}. {anime}" for i, anime in enumerate(top_anime_list))
-        await message.reply_text(response_message, parse_mode="html")
-    except Exception as e:
-        await message.reply_text(f"An error occurred: {e}")
+    top_anime_list = scrape_top_anime()
+    await message.reply_text(f"Top Anime of this Month:\n{top_anime_list}")
