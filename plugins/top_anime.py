@@ -6,9 +6,12 @@ from bot import Bot
 from helper_func import subscribed, decode, get_messages
 
 # Function to fetch top anime from MyAnimeList
-# I know That You're Going To Steel This Featur 
-# If Your steel this featre then import only def command that are give below 
-# Bro I will recommant that make your own script you bastared
+# I know That You're Going to Steel This Feature if you steel i will seguest you use chatgpt (  🥺🥳✅👇   )
+# If Your steel this feature then import only def command that are give below               \| Chatgpt.con |/
+# Bro I will recommant that make your own script you %#$#$##***
+# If You Get Any Error Then Contact me i will not help you 
+# I Will Help But Only If You Pay Me ( Just kidding bro i am not serious )
+# Contact Me @iTz_Anayokoji
 def fetch_top_anime():
     url = 'https://myanimelist.net/topanime.php?type=bypopularity'
     response = requests.get(url)
