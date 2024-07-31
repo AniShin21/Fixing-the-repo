@@ -4,6 +4,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 from bot import Bot
 from helper_func import subscribed, decode, get_messages
+from database.database import present_user, add_user
 
 # Function to fetch top anime from MyAnimeList
 # I know That You're Going to Steel This Feature if you steel i will seguest you use chatgpt (  🥺🥳✅👇   )
@@ -27,21 +28,7 @@ def fetch_top_anime():
 async def top_anime_command(client: Client, message: Message):
     try:
         top_anime_list = fetch_top_anime()
-        response_message = "*Top Anime of July 2024:*\n\n" + "\n".join(f"{i+1}. {anime}" for i, anime in enumerate(top_anime_list))
-        await message.reply_text(response_message, parse_mode="Markdown")
+        response_message = "*Top Anime of July 2024:*\n\n" + "\n".join(f"{i+1}. {anime.replace('.', '\\.').replace('-', '\\-').replace('_', '\\_')}" for i, anime in enumerate(top_anime_list))
+        await message.reply_text(response_message, parse_mode="MarkdownV2")
     except Exception as e:
-        await message.reply_text(f"An error occurred: {e}")
-
-# Assuming you have a similar start command
-@Client.on_message(filters.command('start') & filters.private)
-async def start_command(client: Client, message: Message):
-    id = message.from_user.id
-    if not await present_user(id):
-        try:
-            await add_user(id)
-        except:
-            pass
-    text = message.text
-    if len(text) > 7:
-        # Additional logic here
-        pass
+        await message.reply_text(f"An error occurred: {str(e)}")
