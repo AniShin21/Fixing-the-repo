@@ -28,7 +28,10 @@ def fetch_top_anime():
 async def top_anime_command(client: Client, message: Message):
     try:
         top_anime_list = fetch_top_anime()
-        response_message = "*Top Anime of July 2024:*\n\n" + "\n".join(f"{i+1}. {anime.replace('.', '\\.').replace('-', '\\-').replace('_', '\\_')}" for i, anime in enumerate(top_anime_list))
-        await message.reply_text(response_message, parse_mode="MarkdownV2")
+        new_content = "Top Anime of July 2024:\n\n" + "\n".join(f"{i+1}. {anime}" for i, anime in enumerate(top_anime_list))
+        
+        # Compare with existing message content
+        if message.text != new_content:
+            await message.reply_text(new_content)
     except Exception as e:
         await message.reply_text(f"An error occurred: {str(e)}")
