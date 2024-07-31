@@ -6,6 +6,9 @@ from bot import bot
 from helper_func import subscribed, decode, get_messages
 
 # Function to fetch top anime from MyAnimeList
+# I know That You're Going To Steel This Featur 
+# If Your steel this featre then import only def command that are give below 
+# Bro I will recommant that make your own script you bastared
 def fetch_top_anime():
     url = 'https://myanimelist.net/topanime.php?type=bypopularity'
     response = requests.get(url)
