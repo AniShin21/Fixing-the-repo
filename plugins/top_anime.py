@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from pyrogram import Client, filters
 from pyrogram.types import Message
+from bot import bot
 
 # Function to fetch top anime from MyAnimeList
 def fetch_top_anime():
