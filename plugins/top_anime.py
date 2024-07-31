@@ -13,6 +13,12 @@ from database.database import present_user, add_user
 # If You Get Any Error Then Contact me i will not help you 
 # I Will Help But Only If You Pay Me ( Just kidding bro i am not serious )
 # Contact Me @iTz_Anayokoji
+import requests
+from bs4 import BeautifulSoup
+from pyrogram import Client, filters
+from pyrogram.types import Message
+
+# Function to fetch top anime from MyAnimeList
 def fetch_top_anime():
     url = 'https://myanimelist.net/topanime.php?type=bypopularity'
     response = requests.get(url)
@@ -28,10 +34,7 @@ def fetch_top_anime():
 async def top_anime_command(client: Client, message: Message):
     try:
         top_anime_list = fetch_top_anime()
-        new_content = "Top Anime of July 2024:\n\n" + "\n".join(f"{i+1}. {anime}" for i, anime in enumerate(top_anime_list))
-        
-        # Compare with existing message content
-        if message.text != new_content:
-            await message.reply_text(new_content)
+        response_message = "<b>Top Anime of July 2024:</b>\n\n" + "\n".join(f"{i+1}. {anime}" for i, anime in enumerate(top_anime_list))
+        await message.reply_text(response_message, parse_mode="html")
     except Exception as e:
-        await message.reply_text(f"An error occurred: {str(e)}")
+        await message.reply_text(f"An error occurred: {e}")
