@@ -30,7 +30,7 @@ def scrape_top_anime():
     return "\n".join(top_anime_list)
 
 # Command handler for /top_anime using the provided structure
-@app.on_message(filters.command('top_anime') & filters.private)
+@bot.on_message(filters.command('top_anime') & filters.private)
 async def top_anime_command(client: Client, message: Message):
     top_anime_list = scrape_top_anime()
     await message.reply_text(f"Top Anime of this Month:\n{top_anime_list}")
