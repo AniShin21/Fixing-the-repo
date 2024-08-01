@@ -3,6 +3,7 @@ pyrofork
 TgCrypto
 pyromod==1.5
 beautifulsoup4
+sqlite3
 
 
 
