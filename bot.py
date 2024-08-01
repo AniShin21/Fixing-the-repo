@@ -1,3 +1,19 @@
+from aiohttp import web
+from plugins import web_server
+import pyromod.listen
+from pyrogram import Client, filters
+from pyrogram.enums import ParseMode
+import sys
+from datetime import datetime
+from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL1, FORCE_SUB_CHANNEL2, FORCE_SUB_CHANNEL3, CHANNEL_ID, PORT
+import pyrogram.utils
+
+from plugins.anime import top_anime, handle_callback  # Import the command and callback handlers
+from database.db_handler import create_database  # Import the database creation function
+
+pyrogram.utils.MIN_CHANNEL_ID = -1009147483647
+
+
 class Bot(Client):
     def __init__(self):
         super().__init__(
@@ -95,3 +111,4 @@ class Bot(Client):
     async def stop(self, *args):
         await super().stop()
         self.LOGGER(__name__).info("Bot stopped.")
+
