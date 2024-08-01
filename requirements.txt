@@ -2,7 +2,6 @@
 pyrofork
 TgCrypto
 pyromod==1.5
-sqlite3
 
 
 
