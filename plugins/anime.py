@@ -1,10 +1,10 @@
+# plugins/anime.py
 from pyrogram import Client
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
 import sqlite3
 import requests
-from bot import Bot  # Import Bot for decorator usage
+from decorators import command_decorator, callback_decorator  # Import decorators
 
-# Initialize database
 def create_database():
     conn = sqlite3.connect('anime_data.db')
     cursor = conn.cursor()
@@ -17,7 +17,6 @@ def create_database():
     conn.commit()
     conn.close()
 
-# Fetch data from Anilist API
 def fetch_anime_data(query):
     url = 'https://graphql.anilist.co'
     headers = {'Content-Type': 'application/json'}
@@ -26,7 +25,6 @@ def fetch_anime_data(query):
         return response.json()
     return None
 
-# Get different categories of anime
 def get_weekly_top_anime():
     query = '''
     {
@@ -84,8 +82,7 @@ def get_top_anime_list():
         return data['data']['Page']['media']
     return None
 
-# Define command handlers
-@Bot.on_message(filters.command('top_anime') & filters.private)
+@command_decorator('top_anime')
 async def top_anime(client: Client, message: Message):
     keyboard = [
         [InlineKeyboardButton("Weekly Top Anime", callback_data='weekly')],
@@ -94,8 +91,7 @@ async def top_anime(client: Client, message: Message):
     ]
     await message.reply_text("Select the category:", reply_markup=InlineKeyboardMarkup(keyboard))
 
-# Handle callback queries
-@Bot.on_callback_query()
+@callback_decorator('weekly')
 async def handle_callback(client: Client, callback_query: CallbackQuery):
     data = callback_query.data
     if data == 'weekly':
@@ -120,3 +116,15 @@ async def handle_callback(client: Client, callback_query: CallbackQuery):
         response_text += f"• {title}\n"
 
     await callback_query.message.edit_text(response_text)
+
+def create_database():
+    conn = sqlite3.connect('anime_data.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS weekly_anime (
+            week TEXT PRIMARY KEY,
+            top_anime TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
