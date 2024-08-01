@@ -1,23 +1,16 @@
 from aiohttp import web
 from plugins import web_server
 import pyromod.listen
-from pyrogram import Client, filters
+from pyrogram import Client
 from pyrogram.enums import ParseMode
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-import logging
 import sys
 from datetime import datetime
-from config import API_HASH, APP_ID, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL1, FORCE_SUB_CHANNEL2, FORCE_SUB_CHANNEL3, CHANNEL_ID, PORT
+from plugins.anime import top_anime, handle_callback
+from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL1, FORCE_SUB_CHANNEL2, FORCE_SUB_CHANNEL3, FORCE_SUB_CHANNEL4, CHANNEL_ID, PORT
 import pyrogram.utils
-
-from plugins.anime import top_anime, handle_callback  # Import the command and callback handlers
-from database.db_handler import create_database  # Import the database creation function
 
 pyrogram.utils.MIN_CHANNEL_ID = -1009147483647
 
-# Set up the logger
-logging.basicConfig(level=logging.INFO)
-LOGGER = logging.getLogger(__name__)
 
 class Bot(Client):
     def __init__(self):
@@ -32,13 +25,12 @@ class Bot(Client):
             bot_token=TG_BOT_TOKEN
         )
         self.LOGGER = LOGGER
-        create_database()  # Initialize the database
 
     async def start(self):
         await super().start()
         usr_bot_me = await self.get_me()
         self.uptime = datetime.now()
-
+        
         if FORCE_SUB_CHANNEL1:
             try:
                 link = (await self.get_chat(FORCE_SUB_CHANNEL1)).invite_link
@@ -102,22 +94,24 @@ class Bot(Client):
 ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝                 
                                    
                                     """)
+         self.set_parse_mode(ParseMode.HTML)
+        self.LOGGER(__name__).info(
+            f"Bot Running..!\n\nCreated by \n@iTz_Anayokoji")
+        self.LOGGER(__name__).info(f""" \n\n
+        
+ █████╗ ███╗   ██╗██╗███████╗██╗  ██╗██╗███╗   ██╗
+██╔══██╗████╗  ██║██║██╔════╝██║  ██║██║████╗  ██║
+███████║██╔██╗ ██║██║███████╗███████║██║██╔██╗ ██║
+██╔══██║██║╚██╗██║██║╚════██║██╔══██║██║██║╚██╗██║
+██║  ██║██║ ╚████║██║███████║██║  ██║██║██║ ╚████║
+╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝                  """)
         self.username = usr_bot_me.username
         # web-response
         app = web.AppRunner(await web_server())
         await app.setup()
         bind_address = "0.0.0.0"
         await web.TCPSite(app, bind_address, PORT).start()
-                                                   
-        # Add command and callback query handlers
-        self.add_handler(filters.command("top_anime") & filters.private, top_anime)
-        self.add_handler(filters.create(lambda _, __, query: isinstance(query, CallbackQuery)), handle_callback)
-
-    async def stop(self, *args):
-        await super().stop()
-        self.LOGGER.info("Bot stopped.")
 
     async def stop(self, *args):
         await super().stop()
         self.LOGGER(__name__).info("Bot stopped.")
-
