@@ -4,6 +4,7 @@ import pyromod.listen
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+import logging
 import sys
 from datetime import datetime
 from config import API_HASH, APP_ID, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL1, FORCE_SUB_CHANNEL2, FORCE_SUB_CHANNEL3, CHANNEL_ID, PORT
@@ -14,6 +15,9 @@ from database.db_handler import create_database  # Import the database creation 
 
 pyrogram.utils.MIN_CHANNEL_ID = -1009147483647
 
+# Set up the logger
+logging.basicConfig(level=logging.INFO)
+LOGGER = logging.getLogger(__name__)
 
 class Bot(Client):
     def __init__(self):
@@ -43,10 +47,10 @@ class Bot(Client):
                     link = (await self.get_chat(FORCE_SUB_CHANNEL1)).invite_link
                 self.invitelink = link
             except Exception as a:
-                self.LOGGER(__name__).warning(a)
-                self.LOGGER(__name__).warning("Bot can't Export Invite link from Force Sub Channel!")
-                self.LOGGER(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL1 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL1}")
-                self.LOGGER(__name__).info("\nBot Stopped. Contact @iTz_Anayokoji for support")
+                self.LOGGER.warning(a)
+                self.LOGGER.warning("Bot can't Export Invite link from Force Sub Channel!")
+                self.LOGGER.warning(f"Please Double check the FORCE_SUB_CHANNEL1 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL1}")
+                self.LOGGER.info("\nBot Stopped. Contact @iTz_Anayokoji for support")
                 sys.exit()
         if FORCE_SUB_CHANNEL2:
             try:
@@ -56,10 +60,10 @@ class Bot(Client):
                     link = (await self.get_chat(FORCE_SUB_CHANNEL2)).invite_link
                 self.invitelink2 = link
             except Exception as a:
-                self.LOGGER(__name__).warning(a)
-                self.LOGGER(__name__).warning("Bot can't Export Invite link from Force Sub Channel!")
-                self.LOGGER(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL2 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL2}")
-                self.LOGGER(__name__).info("\nBot Stopped. Contact @iTz_Anayokoji for support")
+                self.LOGGER.warning(a)
+                self.LOGGER.warning("Bot can't Export Invite link from Force Sub Channel!")
+                self.LOGGER.warning(f"Please Double check the FORCE_SUB_CHANNEL2 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL2}")
+                self.LOGGER.info("\nBot Stopped. Contact @iTz_Anayokoji for support")
                 sys.exit()
         if FORCE_SUB_CHANNEL3:
             try:
@@ -69,10 +73,10 @@ class Bot(Client):
                     link = (await self.get_chat(FORCE_SUB_CHANNEL3)).invite_link
                 self.invitelink3 = link
             except Exception as a:
-                self.LOGGER(__name__).warning(a)
-                self.LOGGER(__name__).warning("Bot can't Export Invite link from Force Sub Channel!")
-                self.LOGGER(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL3 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL3}")
-                self.LOGGER(__name__).info("\nBot Stopped. Contact @iTz_Anayokoji for support")
+                self.LOGGER.warning(a)
+                self.LOGGER.warning("Bot can't Export Invite link from Force Sub Channel!")
+                self.LOGGER.warning(f"Please Double check the FORCE_SUB_CHANNEL3 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL3}")
+                self.LOGGER.info("\nBot Stopped. Contact @iTz_Anayokoji for support")
                 sys.exit()      
         try:
             db_channel = await self.get_chat(CHANNEL_ID)
@@ -80,15 +84,15 @@ class Bot(Client):
             test = await self.send_message(chat_id=db_channel.id, text="Test Message")
             await test.delete()
         except Exception as e:
-            self.LOGGER(__name__).warning(e)
-            self.LOGGER(__name__).warning(f"Make Sure bot is Admin in DB Channel, and Double check the CHANNEL_ID Value, Current Value {CHANNEL_ID}")
-            self.LOGGER(__name__).info("\nBot Stopped. Contact @iTz_Anayokoji for support")
+            self.LOGGER.warning(e)
+            self.LOGGER.warning(f"Make Sure bot is Admin in DB Channel, and Double check the CHANNEL_ID Value, Current Value {CHANNEL_ID}")
+            self.LOGGER.info("\nBot Stopped. Contact @iTz_Anayokoji for support")
             sys.exit()
 
         self.set_parse_mode(ParseMode.HTML)
-        self.LOGGER(__name__).info(
+        self.LOGGER.info(
             f"Bot Running..!\n\nCreated by \n@iTz_Anayokoji")
-        self.LOGGER(__name__).info(f""" \n\n
+        self.LOGGER.info(f""" \n\n
         
  █████╗ ███╗   ██╗██╗███████╗██╗  ██╗██╗███╗   ██╗
 ██╔══██╗████╗  ██║██║██╔════╝██║  ██║██║████╗  ██║
@@ -104,15 +108,14 @@ class Bot(Client):
         await app.setup()
         bind_address = "0.0.0.0"
         await web.TCPSite(app, bind_address, PORT).start()
-
+                                                   
         # Add command and callback query handlers
         self.add_handler(filters.command("top_anime") & filters.private, top_anime)
         self.add_handler(filters.create(lambda _, __, query: isinstance(query, CallbackQuery)), handle_callback)
 
     async def stop(self, *args):
         await super().stop()
-        self.LOGGER(__name__).info("Bot stopped.")
-
+        self.LOGGER.info("Bot stopped.")
 
     async def stop(self, *args):
         await super().stop()
