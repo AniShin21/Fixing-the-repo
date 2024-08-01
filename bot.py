@@ -1,21 +1,17 @@
+# bot.py
 from aiohttp import web
 from plugins import web_server
 import pyromod.listen
-from pyrogram import Client, filters
+from pyrogram import Client
 from pyrogram.enums import ParseMode
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-import logging
 import sys
 from datetime import datetime
-from plugins.anime import top_anime, handle_callback
-from config import API_HASH, APP_ID, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL1, FORCE_SUB_CHANNEL2, FORCE_SUB_CHANNEL3, CHANNEL_ID, PORT
+from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL1, FORCE_SUB_CHANNEL2, FORCE_SUB_CHANNEL3, FORCE_SUB_CHANNEL4, CHANNEL_ID, PORT
 import pyrogram.utils
+from plugins.anime import top_anime, handle_callback
 
 pyrogram.utils.MIN_CHANNEL_ID = -1009147483647
 
-# Set up the logger
-logging.basicConfig(level=logging.INFO)
-LOGGER = logging.getLogger(__name__)
 
 class Bot(Client):
     def __init__(self):
@@ -99,12 +95,9 @@ class Bot(Client):
 ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝                 
                                    
                                     """)
-        
-        # Add command and callback query handlers
-        self.add_handler(filters.command("top_anime") & filters.private, top_anime)
-        self.add_handler(filters.create(lambda _, __, query: isinstance(query, CallbackQuery)), handle_callback)
+        self.username = usr_bot_me.username
 
-        # Start web server
+        # web-response
         app = web.AppRunner(await web_server())
         await app.setup()
         bind_address = "0.0.0.0"
@@ -113,4 +106,11 @@ class Bot(Client):
     async def stop(self, *args):
         await super().stop()
         self.LOGGER.info("Bot stopped.")
+        
+    @Bot.on_message(filters.command('top_anime') & filters.private)
+    async def top_anime_command(client: Client, message: Message):
+        await top_anime(client, message)
 
+    @Bot.on_callback_query()
+    async def handle_callback_query(client: Client, callback_query: CallbackQuery):
+        await handle_callback(client, callback_query)
