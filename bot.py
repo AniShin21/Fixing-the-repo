@@ -1,16 +1,3 @@
-from aiohttp import web
-from plugins import web_server
-import pyromod.listen
-from pyrogram import Client
-from pyrogram.enums import ParseMode
-import sys
-from datetime import datetime
-from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL1, FORCE_SUB_CHANNEL2, FORCE_SUB_CHANNEL3, CHANNEL_ID, PORT
-import pyrogram.utils
-
-pyrogram.utils.MIN_CHANNEL_ID = -1009147483647
-
-
 class Bot(Client):
     def __init__(self):
         super().__init__(
@@ -24,6 +11,7 @@ class Bot(Client):
             bot_token=TG_BOT_TOKEN
         )
         self.LOGGER = LOGGER
+        create_database()  # Initialize the database
 
     async def start(self):
         await super().start()
@@ -72,7 +60,7 @@ class Bot(Client):
         try:
             db_channel = await self.get_chat(CHANNEL_ID)
             self.db_channel = db_channel
-            test = await self.send_message(chat_id = db_channel.id, text = "Test Message")
+            test = await self.send_message(chat_id=db_channel.id, text="Test Message")
             await test.delete()
         except Exception as e:
             self.LOGGER(__name__).warning(e)
@@ -99,6 +87,10 @@ class Bot(Client):
         await app.setup()
         bind_address = "0.0.0.0"
         await web.TCPSite(app, bind_address, PORT).start()
+
+        # Add command and callback query handlers
+        self.add_handler(filters.command("top_anime") & filters.private, top_anime)
+        self.add_handler(filters.callback_query, handle_callback)
 
     async def stop(self, *args):
         await super().stop()
