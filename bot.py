@@ -3,9 +3,10 @@ from plugins import web_server
 import pyromod.listen
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 import sys
 from datetime import datetime
-from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL1, FORCE_SUB_CHANNEL2, FORCE_SUB_CHANNEL3, CHANNEL_ID, PORT
+from config import API_HASH, APP_ID, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL1, FORCE_SUB_CHANNEL2, FORCE_SUB_CHANNEL3, CHANNEL_ID, PORT
 import pyrogram.utils
 
 from plugins.anime import top_anime, handle_callback  # Import the command and callback handlers
@@ -44,7 +45,7 @@ class Bot(Client):
             except Exception as a:
                 self.LOGGER(__name__).warning(a)
                 self.LOGGER(__name__).warning("Bot can't Export Invite link from Force Sub Channel!")
-                self.LOGGER(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL1 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL_1}")
+                self.LOGGER(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL1 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL1}")
                 self.LOGGER(__name__).info("\nBot Stopped. Contact @iTz_Anayokoji for support")
                 sys.exit()
         if FORCE_SUB_CHANNEL2:
@@ -57,7 +58,7 @@ class Bot(Client):
             except Exception as a:
                 self.LOGGER(__name__).warning(a)
                 self.LOGGER(__name__).warning("Bot can't Export Invite link from Force Sub Channel!")
-                self.LOGGER(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL2 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL_2}")
+                self.LOGGER(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL2 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL2}")
                 self.LOGGER(__name__).info("\nBot Stopped. Contact @iTz_Anayokoji for support")
                 sys.exit()
         if FORCE_SUB_CHANNEL3:
@@ -70,7 +71,7 @@ class Bot(Client):
             except Exception as a:
                 self.LOGGER(__name__).warning(a)
                 self.LOGGER(__name__).warning("Bot can't Export Invite link from Force Sub Channel!")
-                self.LOGGER(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL3 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL_3}")
+                self.LOGGER(__name__).warning(f"Please Double check the FORCE_SUB_CHANNEL3 value and Make sure Bot is Admin in channel with Invite Users via Link Permission, Current Force Sub Channel Value: {FORCE_SUB_CHANNEL3}")
                 self.LOGGER(__name__).info("\nBot Stopped. Contact @iTz_Anayokoji for support")
                 sys.exit()      
         try:
@@ -106,7 +107,12 @@ class Bot(Client):
 
         # Add command and callback query handlers
         self.add_handler(filters.command("top_anime") & filters.private, top_anime)
-        self.add_handler(filters.callback_query, handle_callback)
+        self.add_handler(filters.create(lambda _, __, query: isinstance(query, CallbackQuery)), handle_callback)
+
+    async def stop(self, *args):
+        await super().stop()
+        self.LOGGER(__name__).info("Bot stopped.")
+
 
     async def stop(self, *args):
         await super().stop()
