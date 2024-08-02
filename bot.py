@@ -1,17 +1,17 @@
 # bot.py
+# Dont even try to touch me repo
 from aiohttp import web
 from plugins import web_server
 import pyromod.listen
-from pyrogram import Client
+from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
+from pyrogram.types import Message, CallbackQuery
 import sys
 from datetime import datetime
 from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL1, FORCE_SUB_CHANNEL2, FORCE_SUB_CHANNEL3, CHANNEL_ID, PORT
-import pyrogram.utils
 from plugins.anime import top_anime, handle_callback
 
 pyrogram.utils.MIN_CHANNEL_ID = -1009147483647
-
 
 class Bot(Client):
     def __init__(self):
@@ -106,11 +106,18 @@ class Bot(Client):
     async def stop(self, *args):
         await super().stop()
         self.LOGGER.info("Bot stopped.")
-        
-    @Bot.on_message(filters.command('top_anime') & filters.private)
-    async def top_anime_command(client: Client, message: Message):
-        await top_anime(client, message)
 
-    @Bot.on_callback_query()
-    async def handle_callback_query(client: Client, callback_query: CallbackQuery):
-        await handle_callback(client, callback_query)
+
+# Define handler functions outside the class
+@Bot.on_message(filters.command('top_anime') & filters.private)
+async def top_anime_command(client: Client, message: Message):
+    await top_anime(client, message)
+
+@Bot.on_callback_query()
+async def handle_callback_query(client: Client, callback_query: CallbackQuery):
+    await handle_callback(client, callback_query)
+
+
+# Initialize and run the bot
+app = Bot()
+app.run()
