@@ -3,8 +3,9 @@ import requests
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.enums import ParseMode
-from bot import Bot  # Make sure this imports your Bot class correctly
+from bot import Bot  # Ensure this imports your Bot class correctly 
 
+# Dont change anythink in this if you dont want error
 # Function to fetch anime data from the API
 def fetch_anime_data(api_url):
     response = requests.get(api_url)
@@ -41,8 +42,8 @@ async def top_anime_command(client: Client, message: Message):
             await message.reply("No top anime found at the moment.")
             return
 
-        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}') 
-                     for anime in top_anime_list[:10]]]
+        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}')] 
+                    for anime in top_anime_list[:10]]
         keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='start')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -63,8 +64,8 @@ async def weekly_anime_command(client: Client, message: Message):
             await message.reply("No weekly anime found at the moment.")
             return
 
-        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}') 
-                     for anime in weekly_anime_list[:10]]]
+        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}')] 
+                    for anime in weekly_anime_list[:10]]
         keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='start')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -90,8 +91,8 @@ async def search_anime_command(client: Client, message: Message):
             await message.reply("No anime found for the search query.")
             return
 
-        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}') 
-                     for anime in search_results[:10]]]
+        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}')] 
+                    for anime in search_results[:10]]
         keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='start')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
