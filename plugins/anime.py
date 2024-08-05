@@ -1,13 +1,9 @@
 import os
 import requests
-from bs4 import BeautifulSoup
 from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.enums import ParseMode
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram.errors import FloodWait
-from bot import Bot
-
-# These are some commands to handel functions of API
+from bot import Bot  # Make sure this imports your Bot class correctly
 
 # Function to fetch anime data from the API
 def fetch_anime_data(api_url):
@@ -36,7 +32,7 @@ def search_anime(query):
     search_results = data.get("data", [])
     return search_results
 
-# Command handler to display top anime
+# Handler to display top anime with buttons
 @Bot.on_message(filters.command('top') & filters.private)
 async def top_anime_command(client: Client, message: Message):
     try:
@@ -45,30 +41,20 @@ async def top_anime_command(client: Client, message: Message):
             await message.reply("No top anime found at the moment.")
             return
 
-        anime_info = ""
-        for anime in top_anime_list[:10]:  # Display top 10 anime
-            title = anime.get("title")
-            url = anime.get("url")
-            score = anime.get("score")
-            anime_info += f"🔹 <a href='{url}'>{title}</a> - Score: {score}\n"
+        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}') 
+                     for anime in top_anime_list[:10]]]
+        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='start')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
-        reply_markup = InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton("View More", url="https://myanimelist.net/topanime.php")]
-            ]
-        )
-        
         await message.reply_text(
-            f"<b>Top Anime:</b>\n\n{anime_info}",
+            "Top Anime:",
             reply_markup=reply_markup,
-            parse_mode=ParseMode.HTML,
-            disable_web_page_preview=True
+            parse_mode=ParseMode.HTML
         )
-
     except Exception as e:
         await message.reply(f"An error occurred: {str(e)}")
 
-# Command handler to display weekly anime
+# Handler to display weekly anime with buttons
 @Bot.on_message(filters.command('weekly') & filters.private)
 async def weekly_anime_command(client: Client, message: Message):
     try:
@@ -77,30 +63,20 @@ async def weekly_anime_command(client: Client, message: Message):
             await message.reply("No weekly anime found at the moment.")
             return
 
-        anime_info = ""
-        for anime in weekly_anime_list[:10]:  # Display top 10 weekly anime
-            title = anime.get("title")
-            url = anime.get("url")
-            score = anime.get("score")
-            anime_info += f"🔹 <a href='{url}'>{title}</a> - Score: {score}\n"
+        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}') 
+                     for anime in weekly_anime_list[:10]]]
+        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='start')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
-        reply_markup = InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton("View More", url="https://myanimelist.net/season")]
-            ]
-        )
-        
         await message.reply_text(
-            f"<b>Weekly Anime:</b>\n\n{anime_info}",
+            "Weekly Anime:",
             reply_markup=reply_markup,
-            parse_mode=ParseMode.HTML,
-            disable_web_page_preview=True
+            parse_mode=ParseMode.HTML
         )
-
     except Exception as e:
         await message.reply(f"An error occurred: {str(e)}")
 
-# Command handler to search for anime
+# Handler to search for anime with buttons
 @Bot.on_message(filters.command('search') & filters.private)
 async def search_anime_command(client: Client, message: Message):
     query = " ".join(message.text.split()[1:])
@@ -114,25 +90,52 @@ async def search_anime_command(client: Client, message: Message):
             await message.reply("No anime found for the search query.")
             return
 
-        anime_info = ""
-        for anime in search_results[:10]:  # Display top 10 search results
-            title = anime.get("title")
-            url = anime.get("url")
-            score = anime.get("score")
-            anime_info += f"🔹 <a href='{url}'>{title}</a> - Score: {score}\n"
+        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}') 
+                     for anime in search_results[:10]]]
+        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='start')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
-        reply_markup = InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton("View More", url="https://myanimelist.net/search/all?q=" + query)]
-            ]
-        )
-        
         await message.reply_text(
-            f"<b>Search Results for '{query}':</b>\n\n{anime_info}",
+            f"Search Results for '{query}':",
             reply_markup=reply_markup,
-            parse_mode=ParseMode.HTML,
-            disable_web_page_preview=True
+            parse_mode=ParseMode.HTML
         )
-
     except Exception as e:
         await message.reply(f"An error occurred: {str(e)}")
+
+# Handler to display anime details
+@Bot.on_callback_query(filters.regex(r'^detail_'))
+async def anime_details(client: Client, callback_query: CallbackQuery):
+    anime_id = callback_query.data.split('_')[1]
+    url = f"https://api.jikan.moe/v4/anime/{anime_id}"
+    
+    try:
+        data = fetch_anime_data(url)
+        anime = data.get("data", {})
+        
+        title = anime.get("title")
+        description = anime.get("synopsis", "No description available.")
+        cover_image = anime.get("images", {}).get("jpg", {}).get("large_image_url", "No cover image")
+        episodes = anime.get("episodes", "N/A")
+        score = anime.get("score", "N/A")
+
+        message_text = (f"*Title:* {title}\n"
+                        f"*Description:* {description}\n"
+                        f"*Episodes:* {episodes}\n"
+                        f"*Score:* {score}\n"
+                        f"[Cover Image]({cover_image})")
+
+        keyboard = [
+            [InlineKeyboardButton("Back to Top Anime", callback_data='top')],
+            [InlineKeyboardButton("Back to Weekly Anime", callback_data='weekly')],
+            [InlineKeyboardButton("Back to Search Results", callback_data='search')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await callback_query.message.reply_text(
+            text=message_text,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.MARKDOWN
+        )
+    except Exception as e:
+        await callback_query.message.reply(f"An error occurred: {str(e)}")
