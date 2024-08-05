@@ -1,12 +1,13 @@
 import os
 import requests
+from bs4 import BeautifulSoup
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.errors import FloodWait
 from bot import Bot
-from config import ADMINS, START_MSG
-from helper_func import subscribed
-from database.database import add_user, present_user
+
+# These are some commands to handel functions of API
 
 # Function to fetch anime data from the API
 def fetch_anime_data(api_url):
@@ -14,77 +15,124 @@ def fetch_anime_data(api_url):
     response.raise_for_status()
     return response.json()
 
-# Function to fetch top anime
+# Function to get top anime
 def get_top_anime():
     url = "https://api.jikan.moe/v4/top/anime"
     data = fetch_anime_data(url)
-    return data['data'][:5]
+    top_anime_list = data.get("data", [])
+    return top_anime_list
 
-# Function to fetch weekly anime
+# Function to get weekly anime
 def get_weekly_anime():
     url = "https://api.jikan.moe/v4/seasons/now"
     data = fetch_anime_data(url)
-    return data['data'][:5]
+    weekly_anime_list = data.get("data", [])
+    return weekly_anime_list
 
-# Function to search anime based on a query
+# Function to search for anime
 def search_anime(query):
-    url = f"https://api.jikan.moe/v4/anime?q={query}"
+    url = f"https://api.jikan.moe/v4/search/anime?q={query}&page=1"
     data = fetch_anime_data(url)
-    return data['data'][:5]
+    search_results = data.get("data", [])
+    return search_results
 
-# Start command handler
-@Bot.on_message(filters.command('start') & filters.private & subscribed)
-async def start_command(client: Client, message: Message):
-    id = message.from_user.id
-    if not await present_user(id):
-        try:
-            await add_user(id)
-        except Exception as e:
-            print(f"Error adding user: {e}")
+# Command handler to display top anime
+@Bot.on_message(filters.command('top') & filters.private)
+async def top_anime_command(client: Client, message: Message):
+    try:
+        top_anime_list = get_top_anime()
+        if not top_anime_list:
+            await message.reply("No top anime found at the moment.")
             return
 
-    reply_markup = InlineKeyboardMarkup(
-        [
+        anime_info = ""
+        for anime in top_anime_list[:10]:  # Display top 10 anime
+            title = anime.get("title")
+            url = anime.get("url")
+            score = anime.get("score")
+            anime_info += f"🔹 <a href='{url}'>{title}</a> - Score: {score}\n"
+
+        reply_markup = InlineKeyboardMarkup(
             [
-                InlineKeyboardButton("Top Anime", callback_data="top"),
-                InlineKeyboardButton("Weekly Anime", callback_data="weekly")
-            ],
-            [
-                InlineKeyboardButton("Search Anime", callback_data="search")
+                [InlineKeyboardButton("View More", url="https://myanimelist.net/topanime.php")]
             ]
-        ]
-    )
-    await message.reply_text(
-        text=START_MSG.format(
-            first=message.from_user.first_name,
-            last=message.from_user.last_name,
-            username=None if not message.from_user.username else '@' + message.from_user.username,
-            mention=message.from_user.mention,
-            id=message.from_user.id
-        ),
-        reply_markup=reply_markup,
-        disable_web_page_preview=True,
-        quote=True
-    )
+        )
+        
+        await message.reply_text(
+            f"<b>Top Anime:</b>\n\n{anime_info}",
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML,
+            disable_web_page_preview=True
+        )
 
-# Handler for fetching and displaying top anime
-@Bot.on_message(filters.command('top') & filters.private & subscribed)
-async def top_anime(client: Client, message: Message):
-    top_animes = get_top_anime()
-    top_text = "Top Anime:\n\n" + "\n".join([f"{i+1}. {anime['title']}" for i, anime in enumerate(top_animes)])
-    await message.reply_text(top_text, disable_web_page_preview=True)
+    except Exception as e:
+        await message.reply(f"An error occurred: {str(e)}")
 
-# Handler for fetching and displaying weekly anime
-@Bot.on_message(filters.command('weekly') & filters.private & subscribed)
-async def weekly_anime(client: Client, message: Message):
-    weekly_animes = get_weekly_anime()
-    weekly_text = "Weekly Anime:\n\n" + "\n".join([f"{i+1}. {anime['title']}" for i, anime in enumerate(weekly_animes)])
-    await message.reply_text(weekly_text, disable_web_page_preview=True)
+# Command handler to display weekly anime
+@Bot.on_message(filters.command('weekly') & filters.private)
+async def weekly_anime_command(client: Client, message: Message):
+    try:
+        weekly_anime_list = get_weekly_anime()
+        if not weekly_anime_list:
+            await message.reply("No weekly anime found at the moment.")
+            return
 
-# Handler for searching anime based on user query
-@Bot.on_message(filters.command('search') & filters.private & subscribed)
-async def search_anime_handler(client: Client, message: Message):
-    query = message.text.split(maxsplit=1)[1]
-    search_results = search_anime(query)
-    search_text = f"Search Results for '{query}':\n\n" + "\n".join([f"{i+1}. {anime['title']}" for i, anime in enumerate(search_results)])
-    await message.reply_text(search_text, disable_web_page_preview=True)
+        anime_info = ""
+        for anime in weekly_anime_list[:10]:  # Display top 10 weekly anime
+            title = anime.get("title")
+            url = anime.get("url")
+            score = anime.get("score")
+            anime_info += f"🔹 <a href='{url}'>{title}</a> - Score: {score}\n"
+
+        reply_markup = InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton("View More", url="https://myanimelist.net/season")]
+            ]
+        )
+        
+        await message.reply_text(
+            f"<b>Weekly Anime:</b>\n\n{anime_info}",
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML,
+            disable_web_page_preview=True
+        )
+
+    except Exception as e:
+        await message.reply(f"An error occurred: {str(e)}")
+
+# Command handler to search for anime
+@Bot.on_message(filters.command('search') & filters.private)
+async def search_anime_command(client: Client, message: Message):
+    query = " ".join(message.text.split()[1:])
+    if not query:
+        await message.reply("Please provide a search query.")
+        return
+
+    try:
+        search_results = search_anime(query)
+        if not search_results:
+            await message.reply("No anime found for the search query.")
+            return
+
+        anime_info = ""
+        for anime in search_results[:10]:  # Display top 10 search results
+            title = anime.get("title")
+            url = anime.get("url")
+            score = anime.get("score")
+            anime_info += f"🔹 <a href='{url}'>{title}</a> - Score: {score}\n"
+
+        reply_markup = InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton("View More", url="https://myanimelist.net/search/all?q=" + query)]
+            ]
+        )
+        
+        await message.reply_text(
+            f"<b>Search Results for '{query}':</b>\n\n{anime_info}",
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML,
+            disable_web_page_preview=True
+        )
+
+    except Exception as e:
+        await message.reply(f"An error occurred: {str(e)}")
