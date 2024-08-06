@@ -3,9 +3,8 @@ import requests
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.enums import ParseMode
-from bot import Bot  # Ensure this imports your Bot class correctly 
+from bot import Bot  # Ensure this imports your Bot class correctly
 
-# Dont change anythink in this if you dont want error
 # Function to fetch anime data from the API
 def fetch_anime_data(api_url):
     response = requests.get(api_url)
@@ -28,7 +27,7 @@ def get_weekly_anime():
 
 # Function to search for anime
 def search_anime(query):
-    url = f"https://api.jikan.moe/v4/search/anime?q={query}&page=1"
+    url = f"https://api.jikan.moe/v4/anime?q={query}&page=1"
     data = fetch_anime_data(url)
     search_results = data.get("data", [])
     return search_results
@@ -133,10 +132,10 @@ async def anime_details(client: Client, callback_query: CallbackQuery):
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await callback_query.message.reply_text(
+        await callback_query.message.edit_text(
             text=message_text,
             reply_markup=reply_markup,
             parse_mode=ParseMode.MARKDOWN
         )
     except Exception as e:
-        await callback_query.message.reply(f"An error occurred: {str(e)}")
+        await callback_query.message.edit_text(f"An error occurred: {str(e)}")
