@@ -32,8 +32,26 @@ def search_anime(query):
     search_results = data.get("data", [])
     return search_results
 
+# Map of anime titles to emojis
+anime_emojis = {
+    "One Piece": "🏴‍☠️",
+    "Naruto": "🥷",
+    "Attack on Titan": "🛡️",
+    "My Hero Academia": "🦸‍♂️",
+    "Demon Slayer": "⚔️",
+    "Sword Art Online": "🗡️",
+    # Add more mappings as needed
+}
+
+# Function to get emoji for anime title
+def get_anime_emoji(title):
+    for key in anime_emojis:
+        if key.lower() in title.lower():
+            return anime_emojis[key]
+    return "🎬"  # Default emoji
+
 # Handler to display top anime with buttons
-@Bot.on_message(filters.command('top') & filters.private)
+@Bot.on_message(filters.command('top_anime') & filters.private)
 async def top_anime_command(client: Client, message: Message):
     try:
         top_anime_list = get_top_anime()
@@ -41,9 +59,9 @@ async def top_anime_command(client: Client, message: Message):
             await message.reply("No top anime found at the moment.")
             return
 
-        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}')] 
+        keyboard = [[InlineKeyboardButton(f"{get_anime_emoji(anime.get('title'))} {anime.get('title')}", callback_data=f'detail_{anime.get("mal_id")}')] 
                     for anime in top_anime_list[:10]]
-        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='start')])
+        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='top_anime')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await message.reply_text(
@@ -63,9 +81,9 @@ async def weekly_anime_command(client: Client, message: Message):
             await message.reply("No weekly anime found at the moment.")
             return
 
-        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}')] 
+        keyboard = [[InlineKeyboardButton(f"{get_anime_emoji(anime.get('title'))} {anime.get('title')}", callback_data=f'detail_{anime.get("mal_id")}')] 
                     for anime in weekly_anime_list[:10]]
-        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='start')])
+        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='top_anime')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await message.reply_text(
@@ -90,9 +108,9 @@ async def search_anime_command(client: Client, message: Message):
             await message.reply("No anime found for the search query.")
             return
 
-        keyboard = [[InlineKeyboardButton(anime.get("title"), callback_data=f'detail_{anime.get("mal_id")}')] 
+        keyboard = [[InlineKeyboardButton(f"{get_anime_emoji(anime.get('title'))} {anime.get('title')}", callback_data=f'detail_{anime.get("mal_id")}')] 
                     for anime in search_results[:10]]
-        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='start')])
+        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='top_anime')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await message.reply_text(
@@ -126,7 +144,7 @@ async def anime_details(client: Client, callback_query: CallbackQuery):
                         f"[Cover Image]({cover_image})")
 
         keyboard = [
-            [InlineKeyboardButton("Back to Top Anime", callback_data='top')],
+            [InlineKeyboardButton("Back to Top Anime", callback_data='top_anime')],
             [InlineKeyboardButton("Back to Weekly Anime", callback_data='weekly')],
             [InlineKeyboardButton("Back to Search Results", callback_data='search')]
         ]
