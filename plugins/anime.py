@@ -76,7 +76,7 @@ async def top_anime_command(client: Client, message: Message):
 
         keyboard = [[InlineKeyboardButton(f"{get_anime_emoji(anime.get('title'))} {anime.get('title')}", callback_data=f'detail_{anime.get("mal_id")}')] 
                     for anime in top_anime_list[:10]]
-        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='top_anime')])
+        keyboard.append([InlineKeyboardButton("🅲🅻🅾🆂🅴", callback_data='close')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await message.reply_text(
@@ -98,7 +98,7 @@ async def weekly_anime_command(client: Client, message: Message):
 
         keyboard = [[InlineKeyboardButton(f"{get_anime_emoji(anime.get('title'))} {anime.get('title')}", callback_data=f'detail_{anime.get("mal_id")}')] 
                     for anime in weekly_anime_list[:10]]
-        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='top_anime')])
+        keyboard.append([InlineKeyboardButton("🅲🅻🅾🆂🅴", callback_data='close')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await message.reply_text(
@@ -125,7 +125,7 @@ async def search_anime_command(client: Client, message: Message):
 
         keyboard = [[InlineKeyboardButton(f"{get_anime_emoji(anime.get('title'))} {anime.get('title')}", callback_data=f'detail_{anime.get("mal_id")}')] 
                     for anime in search_results[:10]]
-        keyboard.append([InlineKeyboardButton("Back to Main Menu", callback_data='top_anime')])
+        keyboard.append([InlineKeyboardButton("🅲🅻🅾🆂🅴", callback_data='close')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await message.reply_text(
@@ -152,15 +152,11 @@ async def anime_details(client: Client, callback_query: CallbackQuery):
         score = anime.get("score", "N/A")
 
         message_text = (f"{style_anime_title(title)}\n\n"
-                        f"*Description:* {description}\n"
-                        f"*Episodes:* {episodes}\n"
-                        f"*Score:* {score}\n")
+                        f"📖 *Description:* {description}\n"
+                        f"🎬 *Episodes:* {episodes}\n"
+                        f"⭐ *Score:* {score}\n")
 
-        keyboard = [
-            [InlineKeyboardButton("Back to Top Anime", callback_data='top')],
-            [InlineKeyboardButton("Back to Weekly Anime", callback_data='weekly')],
-            [InlineKeyboardButton("Back to Search Results", callback_data='search')]
-        ]
+        keyboard = [[InlineKeyboardButton("🅲🅻🅾🆂🅴", callback_data='close')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await callback_query.message.edit_text(
@@ -170,4 +166,10 @@ async def anime_details(client: Client, callback_query: CallbackQuery):
         )
     except Exception as e:
         await callback_query.message.edit_text(f"An error occurred: {str(e)}")
+
+# Handler to close the message
+@Bot.on_callback_query(filters.regex(r'^close$'))
+async def close_message(client: Client, callback_query: CallbackQuery):
+    await callback_query.message.delete()
+
 
