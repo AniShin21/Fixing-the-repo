@@ -50,8 +50,23 @@ def get_anime_emoji(title):
             return anime_emojis[key]
     return "🎬"  # Default emoji
 
-# Handler to display top anime with buttons
+# Cool font style for the anime title
+def style_anime_title(title):
+    return f"**{title}**".replace("A", "𝔸").replace("B", "𝔹").replace("C", "ℂ").replace("D", "𝔻").replace("E", "𝔼").replace("F", "𝔽").replace("G", "𝔾").replace("H", "ℍ").replace("I", "𝕀").replace("J", "𝕁").replace("K", "𝕂").replace("L", "𝕃").replace("M", "𝕄").replace("N", "ℕ").replace("O", "𝕆").replace("P", "ℙ").replace("Q", "ℚ").replace("R", "ℝ").replace("S", "𝕊").replace("T", "𝕋").replace("U", "𝕌").replace("V", "𝕍").replace("W", "𝕎").replace("X", "𝕏").replace("Y", "𝕐").replace("Z", "ℤ")
+
+# Handler to provide command instructions
 @Bot.on_message(filters.command('top_anime') & filters.private)
+async def top_anime_instructions(client: Client, message: Message):
+    instructions = (
+        "Here are the available commands:\n"
+        "/top - Display the top anime list.\n"
+        "/weekly - Display the current season's anime.\n"
+        "/search <query> - Search for an anime."
+    )
+    await message.reply_text(instructions, parse_mode=ParseMode.HTML)
+
+# Handler to display top anime with buttons
+@Bot.on_message(filters.command('top') & filters.private)
 async def top_anime_command(client: Client, message: Message):
     try:
         top_anime_list = get_top_anime()
@@ -133,18 +148,16 @@ async def anime_details(client: Client, callback_query: CallbackQuery):
         
         title = anime.get("title")
         description = anime.get("synopsis", "No description available.")
-        cover_image = anime.get("images", {}).get("jpg", {}).get("large_image_url", "No cover image")
         episodes = anime.get("episodes", "N/A")
         score = anime.get("score", "N/A")
 
-        message_text = (f"*Title:* {title}\n"
+        message_text = (f"{style_anime_title(title)}\n\n"
                         f"*Description:* {description}\n"
                         f"*Episodes:* {episodes}\n"
-                        f"*Score:* {score}\n"
-                        f"[Cover Image]({cover_image})")
+                        f"*Score:* {score}\n")
 
         keyboard = [
-            [InlineKeyboardButton("Back to Top Anime", callback_data='top_anime')],
+            [InlineKeyboardButton("Back to Top Anime", callback_data='top')],
             [InlineKeyboardButton("Back to Weekly Anime", callback_data='weekly')],
             [InlineKeyboardButton("Back to Search Results", callback_data='search')]
         ]
@@ -157,3 +170,4 @@ async def anime_details(client: Client, callback_query: CallbackQuery):
         )
     except Exception as e:
         await callback_query.message.edit_text(f"An error occurred: {str(e)}")
+
