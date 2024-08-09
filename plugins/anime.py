@@ -32,24 +32,6 @@ def search_anime(query):
     search_results = data.get("data", [])
     return search_results
 
-# Map of anime titles to emojis
-anime_emojis = {
-    "One Piece": "🏴‍☠️",
-    "Naruto": "🥷",
-    "Attack on Titan": "🛡️",
-    "My Hero Academia": "🦸‍♂️",
-    "Demon Slayer": "⚔️",
-    "Sword Art Online": "🗡️",
-    # Add more mappings as needed
-}
-
-# Function to get emoji for anime title
-def get_anime_emoji(title):
-    for key in anime_emojis:
-        if key.lower() in title.lower():
-            return anime_emojis[key]
-    return "🎬"  # Default emoji
-
 # Cool font style for the anime title
 def style_anime_title(title):
     return f"**{title}**".replace("A", "𝔸").replace("B", "𝔹").replace("C", "ℂ").replace("D", "𝔻").replace("E", "𝔼").replace("F", "𝔽").replace("G", "𝔾").replace("H", "ℍ").replace("I", "𝕀").replace("J", "𝕁").replace("K", "𝕂").replace("L", "𝕃").replace("M", "𝕄").replace("N", "ℕ").replace("O", "𝕆").replace("P", "ℙ").replace("Q", "ℚ").replace("R", "ℝ").replace("S", "𝕊").replace("T", "𝕋").replace("U", "𝕌").replace("V", "𝕍").replace("W", "𝕎").replace("X", "𝕏").replace("Y", "𝕐").replace("Z", "ℤ")
@@ -74,9 +56,9 @@ async def top_anime_command(client: Client, message: Message):
             await message.reply("No top anime found at the moment.")
             return
 
-        keyboard = [[InlineKeyboardButton(f"{get_anime_emoji(anime.get('title'))} {anime.get('title')}", callback_data=f'detail_{anime.get("mal_id")}')] 
+        keyboard = [[InlineKeyboardButton(f"{style_anime_title(anime.get('title'))}", callback_data=f'detail_{anime.get("mal_id")}')] 
                     for anime in top_anime_list[:10]]
-        keyboard.append([InlineKeyboardButton("🅲🅻🅾🆂🅴", callback_data='close')])
+        keyboard.append([InlineKeyboardButton("✖️✨ 𝕮𝖑𝖔𝖘𝖊 ✨✖️", callback_data='close')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await message.reply_text(
@@ -96,9 +78,9 @@ async def weekly_anime_command(client: Client, message: Message):
             await message.reply("No weekly anime found at the moment.")
             return
 
-        keyboard = [[InlineKeyboardButton(f"{get_anime_emoji(anime.get('title'))} {anime.get('title')}", callback_data=f'detail_{anime.get("mal_id")}')] 
+        keyboard = [[InlineKeyboardButton(f"{style_anime_title(anime.get('title'))}", callback_data=f'detail_{anime.get("mal_id")}')] 
                     for anime in weekly_anime_list[:10]]
-        keyboard.append([InlineKeyboardButton("🅲🅻🅾🆂🅴", callback_data='close')])
+        keyboard.append([InlineKeyboardButton("✖️✨ 𝕮𝖑𝖔𝖘𝖊 ✨✖️", callback_data='close')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await message.reply_text(
@@ -109,67 +91,33 @@ async def weekly_anime_command(client: Client, message: Message):
     except Exception as e:
         await message.reply(f"An error occurred: {str(e)}")
 
-# Handler to search for anime with buttons
-@Bot.on_message(filters.command('search') & filters.private)
-async def search_anime_command(client: Client, message: Message):
-    query = " ".join(message.text.split()[1:])
-    if not query:
-        await message.reply("Please provide a search query.")
-        return
-
-    try:
-        search_results = search_anime(query)
-        if not search_results:
-            await message.reply("No anime found for the search query.")
-            return
-
-        keyboard = [[InlineKeyboardButton(f"{get_anime_emoji(anime.get('title'))} {anime.get('title')}", callback_data=f'detail_{anime.get("mal_id")}')] 
-                    for anime in search_results[:10]]
-        keyboard.append([InlineKeyboardButton("🅲🅻🅾🆂🅴", callback_data='close')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
-        await message.reply_text(
-            f"Search Results for '{query}':",
-            reply_markup=reply_markup,
-            parse_mode=ParseMode.HTML
-        )
-    except Exception as e:
-        await message.reply(f"An error occurred: {str(e)}")
-
-# Handler to display anime details
-@Bot.on_callback_query(filters.regex(r'^detail_'))
-async def anime_details(client: Client, callback_query: CallbackQuery):
-    anime_id = callback_query.data.split('_')[1]
-    url = f"https://api.jikan.moe/v4/anime/{anime_id}"
-    
-    try:
+# Callback handler for detail and close button
+@Bot.on_callback_query()
+async def callback_query_handler(client: Client, callback_query: CallbackQuery):
+    if callback_query.data.startswith("detail_"):
+        mal_id = callback_query.data.split("_")[1]
+        url = f"https://api.jikan.moe/v4/anime/{mal_id}"
         data = fetch_anime_data(url)
-        anime = data.get("data", {})
-        
-        title = anime.get("title")
-        description = anime.get("synopsis", "No description available.")
-        episodes = anime.get("episodes", "N/A")
-        score = anime.get("score", "N/A")
 
-        message_text = (f"{style_anime_title(title)}\n\n"
-                        f"📖 *Description:* {description}\n"
-                        f"🎬 *Episodes:* {episodes}\n"
-                        f"⭐ *Score:* {score}\n")
+        if data:
+            anime = data.get("data", {})
+            details = (
+                f"**Title:** {style_anime_title(anime.get('title'))}\n"
+                f"**Type:** {anime.get('type')}\n"
+                f"**Episodes:** {anime.get('episodes')}\n"
+                f"**Score:** {anime.get('score')}\n"
+                f"**Synopsis:** {anime.get('synopsis')}\n"
+                f"**URL:** [MyAnimeList]({anime.get('url')})"
+            )
+            await callback_query.message.edit_text(
+                details,
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("✖️✨ 𝕮𝖑𝖔𝖘𝖊 ✨✖️", callback_data='close')]]
+                ),
+                parse_mode=ParseMode.MARKDOWN
+            )
+    elif callback_query.data == 'close':
+        await callback_query.message.delete()
 
-        keyboard = [[InlineKeyboardButton("🅲🅻🅾🆂🅴", callback_data='close')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
-        await callback_query.message.edit_text(
-            text=message_text,
-            reply_markup=reply_markup,
-            parse_mode=ParseMode.MARKDOWN
-        )
-    except Exception as e:
-        await callback_query.message.edit_text(f"An error occurred: {str(e)}")
-
-# Handler to close the message
-@Bot.on_callback_query(filters.regex(r'^close$'))
-async def close_message(client: Client, callback_query: CallbackQuery):
-    await callback_query.message.delete()
 
 
